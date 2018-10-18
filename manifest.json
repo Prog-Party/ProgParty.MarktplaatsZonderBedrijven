@@ -1,0 +1,15 @@
+{
+   "content_scripts": [ {
+      "css": [ "css/core.css" ],
+      "js": [ "js/jquery-3.3.1.min.js", "js/marktplaats-base.js", "js/remove-ads.js" ],
+      "matches": [ "https://www.marktplaats.nl/*" ]
+   } ],
+   "description": "ProgParty Marktplaats",
+   "icons": {
+
+   },
+   "manifest_version": 2,
+   "name": "ProgParty MarktPlaats",
+   "version": "0.1.1",
+   "web_accessible_resources": [ "html/project-page.html" ]
+}
