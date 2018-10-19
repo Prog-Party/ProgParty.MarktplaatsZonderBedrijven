@@ -1,0 +1,11 @@
+.simply-translate-body ul#QuickAccess > li {
+	margin-bottom: 20px;
+}
+
+.simply-translate-body .truncate {
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    display: inline-block;
+}

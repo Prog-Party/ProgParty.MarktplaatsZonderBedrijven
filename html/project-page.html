@@ -1,0 +1,545 @@
+<div class='row'>
+	<div class='col-8' id="ActionsColumn">
+		<h3><b>Acties</b></h3>
+		<table class="table">
+			<tr>
+				<th>Acties</th>
+				<th>Voorwaarden</th>
+				<th></th>
+			</tr>	
+			<tr id="SetPayables" style="display:none;">
+				<td>
+					<span>Payables aanmaken</span>
+					<div style="display:none;" id="SetPayablesInfoUrl">
+						<a class="link" href="https://platform.simplytranslate.nl/Admin/UpworkEmails" target="_blank">Naar Upwork e-mail overzicht</a>
+					</div>
+				</td>
+				<td colspan="2">				
+					<dl class="dl-horizontal dl-horizontal-small" id="PayablesChecklist">
+						
+					</dl>
+					
+					<div id="SetPayablesError" class="alert alert-danger" style="display:none;"></div>
+				</td>
+			</tr>			
+			<tr id="ChangeTranslationToReadyHolder" style="display:none;">
+				<td><span>Translation proces op Ready zetten</span></td>
+				<td>				
+					<dl class="dl-horizontal dl-horizontal-small">
+						<dt id="ChangeTranslationToReadyAction"></dt>
+						<dd>Translation processen moeten op 'Accepted' of 'Started' staan</dd>
+					</dl>
+				</td>
+				<td>
+					<input id="ChangeTranslationToReadyButton" type='button' class='btn btn-primary' value="Verander Translation naar Ready" disabled="disabled"/>
+					<div id="ChangeTranslationToReadyError" class="alert alert-danger" style="display:none;"></div>
+				</td>
+			</tr>	
+			<tr id="ChangeFinalizationToReadyHolder" style="display:none;">
+				<td><span>Finalization proces op Ready zetten</span></td>
+				<td>				
+					<dl class="dl-horizontal dl-horizontal-small">
+						<dt id="ChangeFinalizationActionTranslationStatus"></dt>
+						<dd>Translation processen moeten op 'Ready' staan</dd>
+						<dt id="ChangeFinalizationActionFinalizationStatus"></dt>
+						<dd>Finalization proces moet op 'Accepted' of 'Started' staan</dd>
+							<br />
+					</dl>
+				</td>
+				<td>
+					<input id="ChangeFinalizationToReadyButton" type='button' class='btn btn-primary' value="Verander Finalization naar Ready" disabled="disabled"/>
+					<div id="ChangeFinalizationToReadyError" class="alert alert-danger" style="display:none;"></div>
+				</td>
+			</tr>	
+			<tr id="UploadTranslations" style="display:none;">
+				<td><span title="Zodra de vertaling klaar is kan deze geüpload worden. Door op de Upload knop te drukken wordt de notificatie url (zie Custom Fields) uitgevoerd.">Upload vertalingen</span></td>
+				<td>				
+					<dl class="dl-horizontal dl-horizontal-small">
+						<dt id="ActionUploadTranslationStatus"></dt>
+						<dd>Vertaling moet op 'Ready' staan</dd>
+					</dl>
+				</td>
+				<td>
+					<input id="UploadTranslationButton" type='button' class='btn btn-primary' value="Upload de vertalingen" />
+					<div id="UploadTranslationError" class="alert alert-danger" style="display:none;"></div>
+				</td>
+			</tr>		
+			<tr id="MoveNasFolder" style="display:none;">
+				<td><span title="De NAS map staat momenteel op de verkeerde plek. Met deze knop kan je deze goed zetten.">Verplaats de NAS map</span></td>
+				<td>				
+					Momenteel staat dit project in de <i id="CurrentNasFolder" /> map, deze hoort hier te staan: <i id="TargetNasFolder" />.
+				</td>
+				<td>
+					<input id="MoveNasFolderButton" type='button' class='btn btn-primary' value="Verplaats de map" onclick="_moveNasFolder.executeClick(this)" />
+					<div id="MoveNasFolderError" class="alert alert-danger" style="display:none;"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class='col-4'>
+		<h3><b>Snelle toegang</b></h3>
+		<ul id="QuickAccess">
+			<li id="copyProjectFolderButton" style="display:none;"><span style="display:inline-block;width:24px;text-align:center;">&#128203;</span><a href="javascript:copyProjectFolder();" class="link"> Kopieer projectmap</a></li>
+			<li id="quickAccessInternalNotes" style="display:none;"></li>
+		</ul>
+	</div>
+</div>
+
+<style>
+	#PayablesChecklist .payable-header {
+		cursor:pointer;
+	 }
+</style>
+
+<script id="PayableChecklistTemplate" type="text/x-jsrender">
+	<!-- <dt style="width:200px;text-align:left;"><b>Taal {{:language}}</b></dt> -->
+	<dt>
+		<span data-project-id="{{:id}}" class="payable-full-status icon icon-16 icon-warning"></span>
+	</dt>
+	<dd data-project-id="{{:id}}" class="payable-header"><b>Taal {{:language}}</b></dd>
+	
+	<dt></dt>
+	<dd>
+		<dl style="display:none;" data-targetlanguage="{{:targetLanguage}}" data-vendor-name="{{:vendor}}" data-project-id="{{:id}}" class="dl-horizontal dl-horizontal-small">		
+			<dt>
+				<span class='icon icon-16 icon-{{if hasVendor}}ok{{else}}error{{/if}}'></span>
+			</dt>
+			<dd>Ken vertaler toe {{if hasVendor}}(<i>{{:vendor}}</i>){{/if}}</dd>
+			<dt>
+				<span class='icon icon-16 icon-{{if hasDeadline}}ok{{else}}error{{/if}}'></span>
+			</dt>
+			<dd data-has-deadline="{{if hasDeadline}}true{{else}}false{{/if}}">Stel deadline in {{if hasDeadline}}(<i>{{:deadline}}</i>){{/if}}</dd>
+			<dt class="payable_label" data-project-id="{{:id}}">{{:imgLoading}}</dt>
+			<dd>Maak payable aan <span class="payable_value" data-project-id="{{:id}}"></span></dd>
+			<dt class="payable_upwork_label" style="display:none;"></dt>
+			<dd class="payable_upwork_value" style="display:none;color:red;"><b>Voorstel Upwork naam:</b> <br />XXX {{:sourceLanguage2Letter}} > {{:targetLanguage2Letter}} <span class="wordcount"></span> words</dd>
+		</dl>
+	</dd>
+</script>
+
+<script>
+	var _uploadTranslations = new UploadTranslations();
+	var _payableController = new PayableController();
+	var _changeTranslationToReadyController = new ChangeTranslationToReadyController();
+	var _changeFinalizationToReadyController = new ChangeFinalizationToReadyController();
+	
+	$(function() {
+		_uploadTranslations.initialize();
+		_payableController.initialize();
+		_changeTranslationToReadyController.initialize();
+		_changeFinalizationToReadyController.initialize();
+		
+		_rexProject.setMatecatLinksAsHtmlList();
+		
+		if($("#ActionsColumn tr:visible").length <= 1) {
+			$("#ActionsColumn").hide();
+		}		
+	});
+	
+	function PayableController() {	
+	
+		this.initialize = function() {
+			if(rowIsVisible()) {
+				getRow().show();
+				
+				var jobs = _rexProject.translationJobs;
+				for(var i = 0; i < jobs.length; i++) {
+					var job = jobs[i];
+					$("#PayablesChecklist").append($("#PayableChecklistTemplate").render(job));
+				}
+				
+				initializeHeaderClick();
+				loadPayables();
+			}
+			<!-- setUploadTranslationStatus(); -->
+			<!-- checkTranslationStatusChanged(); -->
+			
+			<!-- getButton().click(uploadTranslationsClick); -->
+		}	
+		
+		function initializeHeaderClick()
+		{
+			$("#PayablesChecklist .payable-header").click(function() {
+				var id = $(this).data("project-id");
+				var payableSpecifics = $("dl[data-project-id='" + id + "']");
+				payableSpecifics.toggle();
+			});
+		}
+		
+		function loadPayables()
+		{
+			AjaxGet("Project/GetPayables?internalProjectId=" + _rexProject.metaProjectInternalId, 
+			function(json) {
+				var payables = JSON.parse(json);
+				
+				for(var i = 0; i < payables.length; i++)
+				{
+					var payable = payables[i];
+					var id 		= payable.idNumberParent;
+					var payableSpecifics = getPayableSpecifics(id, payable.vendor, "");
+					if(payableSpecifics.length == 1) {
+						id = payableSpecifics.attr("data-project-id");
+					}
+										
+					var payableLabel 		= $(".payable_label[data-project-id='" 		 + id + "']");
+					var payableValue 		= $(".payable_value[data-project-id='" 		 + id + "']");
+					var payableFullStatus 	= $(".payable-full-status[data-project-id='" + id + "']");
+					
+					if(payableSpecifics.length != 0 && payable.amountPayables != 0) {					
+						payableLabel.html(getImgOk());
+						payableValue.html("(<i>" + payable.price + "</i>)");
+						payableFullStatus.removeClass("icon-warning");
+						payableFullStatus.addClass("icon-ok");
+						payableSpecifics.hide();
+					}
+					
+					var payableHasDeadline = $("dl[data-project-id='" + id + "'] dd[data-has-deadline]").attr("data-has-deadline");
+					if("false" == payableHasDeadline) {	
+						payableFullStatus.addClass("icon-warning");
+						payableFullStatus.removeClass("icon-ok");
+						payableSpecifics.show();
+					}
+				}
+				
+				$(".payable-full-status.icon-warning").each(function(i, o) {
+					var id = $(o).attr("data-project-id");
+					getPayableSpecifics(id).show();
+				});
+				
+				$("#PayablesChecklist .payable_label .icon-loading").addClass("icon-error").removeClass("icon-loading");
+				
+				if($("#PayablesChecklist .payable_label .icon-error").length > 0) {
+					loadUpworkEmails();
+					$("#SetPayablesInfoUrl").show();
+				}
+				
+			}, function(json, message) {
+				getErrorField().show();
+				getErrorField().html(json.responseJSON.Message + " - contact the IT team");
+			});
+		}
+		
+		function loadUpworkEmails()
+		{
+			AjaxGet("Project/GetUpworkPaymentEmailStatus?internalProjectId=" + _rexProject.metaProjectInternalId, 
+			function(json) {
+				var upworkMails = JSON.parse(json);
+				
+				for(var i = 0; i < upworkMails.length; i++)
+				{
+					var mail = upworkMails[i];
+					var row = $(".payable-header:contains(" + mail.LanguageCode + ")");
+					if(row.length == 1)
+					{
+						var id = row.attr("data-project-id");
+						//show the upwork error fields:
+						$("dl[data-project-id='" + id + "'] .payable_upwork_label").show();
+						var value = $("dl[data-project-id='" + id + "'] .payable_upwork_value");
+						var error = "Bekijk de upwork log";
+						if(mail.Error != null) {
+							error = "Upwork foutmelding: " + mail.Error;
+						}
+						var log = getLog(mail.Log);
+						value.html(error + "<span class='icon icon-16 icon-info' style='margin-left:10px;' title='" + log + "'></span>");
+						value.show();
+					}					
+				}
+				
+				
+				$(".payable-full-status.icon-warning").each(function(i, o) {
+					var id = $(o).attr("data-project-id");
+					var payableSpecifics = getPayableSpecifics(id);
+					var upworkValue = payableSpecifics.find(".payable_upwork_value");
+					if(upworkValue.is(":hidden"))
+					{
+						var wc = _rexProject.translatorWordcount;
+						upworkValue.show();
+						upworkValue.find(".wordcount").html(wc);
+						upworkValue.css("color", "black");
+					}
+				});
+				
+			}, function(json, message) {
+				getErrorField().show();
+				var message = "Er ging iets onverwachts mis";
+				if(json.responseJSON != undefined) {
+					message = json.responseJSON.Message;
+				}
+				getErrorField().html(message + " - neem contact op met het IT team");
+			});
+		}
+		
+		function getLog(mailLog)
+		{
+			if(mailLog == undefined || mailLog == null || mailLog.length == 0) {
+				return "Geen log aanwezig";
+			}
+			
+			var mailLogParsed = JSON.parse(mailLog);
+			var log = "";
+			for(var i = 0; i < mailLogParsed.length; i++) {
+				var logItem = mailLogParsed[i];
+				log += (i+1) + ". " + logItem + "\n";
+			}
+			return log;
+		}
+		
+		function getPayableSpecifics(id, vendor, targetLanguage)
+		{
+			var payableSpecifics = $("dl[data-project-id='" + id + "']");
+			if(payableSpecifics.length != 0) {
+				return payableSpecifics;
+			}
+			
+			payableSpecifics = $("dl[data-vendor-name='" + vendor + "']");
+			if(payableSpecifics.length != 0) {
+				return payableSpecifics;
+			}
+			
+			payableSpecifics = $("dl[data-targetlanguage='" + targetLanguage + "']");
+			if(payableSpecifics.length != 0) {
+				return payableSpecifics;
+			}
+			
+			return payableSpecifics;
+		}
+		
+		function getErrorField(){ return $("#SetPayablesError"); }
+		function getRow() 		{ return $("#SetPayables"); }
+		function rowIsVisible() { return true; }
+	}
+	
+	function UploadTranslations() {
+	
+		this.initialize = function() {
+			setUploadTranslationStatus();
+			checkTranslationStatusChanged();
+			
+			getButton().click(uploadTranslationsClick);
+		}
+		
+		function checkTranslationStatusChanged() {			
+			var newStatus = getTranslationStatus();
+			
+			var isSame = true;
+			if(oldTranslationStatus != newStatus && oldTranslationStatus != "") {
+				isSame = false;
+			}
+			oldTranslationStatus = newStatus;
+			
+			if(!isSame) { setUploadTranslationStatus() }
+			
+			setTimeout(checkTranslationStatusChanged, 1000);
+		}
+		
+		function getErrorField(){ return $("#UploadTranslationError"); }
+		function getButton() 	{ return $("#UploadTranslationButton"); }
+		function getRow() 		{ return $("#UploadTranslations"); }
+		function rowIsVisible() { 
+			var notificationUrl = $("div.title:contains('Notification URL')").next().find("input[type=text]").val();
+			return notificationUrl && notificationUrl.length > 0;
+		}
+		
+		function isOk() 		{ return isOkTranslationStatus(); } 
+		
+		function isOkTranslationStatus() {
+			return  getTranslationStatus() == "Ready";
+		}
+		
+		function getTranslationStatus() {
+			var translationField = $(".job .content .title .short").filter(function() {return $(this).text() == "Translation";});
+			if(translationField.length == 0) { return ""; }
+			return translationField.parent().parent().find(".single .status").text();		
+		}
+		
+		function setUploadTranslationStatus() {
+			if(rowIsVisible()) {
+				getRow().show();
+				
+				_pageHelper.setIsValid(isOkTranslationStatus(), "#ActionUploadTranslationStatus");
+				
+				_pageHelper.setButtonEnablement(isOk(), getButton());
+			}
+		}		
+		
+		function uploadTranslationsClick() {
+			AjaxGet("Project/UploadTranslations?internalProjectId=" + _rexProject.metaProjectInternalId, 
+			function(json) {
+				alert("Het uploaden is uitgevoerd zonder foutmelding, de pagina zal worden herladen.");
+				reloadPage();
+			}, function(json, message) {
+				getErrorField().show();
+				getErrorField().html(json.responseJSON.Message + " - contact the IT team");
+				buttonDoneClicking("#UploadTranslationButton");
+			});
+		}
+		
+		var oldTranslationStatus = "";
+	}
+	
+	function ChangeTranslationToReadyController() {
+	
+		this.initialize = function() {
+			setChangeTranslationToReadyStatus();
+			checkTranslationStatusChanged();
+			
+			getButton().click(changeTranslationToReadyClick);
+		}
+		
+		function checkTranslationStatusChanged() {
+			setChangeTranslationToReadyStatus();
+			
+			setTimeout(checkTranslationStatusChanged, 1000);
+		}
+		
+		function getErrorField(){ return $("#ChangeTranslationToReadyError"); }
+		function getButton() 	{ return $("#ChangeTranslationToReadyButton"); }
+		function getRow() 		{ return $("#ChangeTranslationToReadyHolder"); }
+		function rowIsVisible() { return true; }
+		
+		function isOk() 		{ return anyTranslationProcessInAcceptedOrStarted(); } 
+		
+		function anyTranslationProcessInAcceptedOrStarted() {
+			var jobs = _rexProject.translationJobs;
+			for(var i = 0; i < jobs.length; i++) {
+				var job = jobs[i];
+				if(job.jobStatus == "Accepted" || job.jobStatus == "Started") {
+					return true;
+				}
+			}
+		
+			return false;
+		}
+		
+		function allAreReady() {
+			var jobs = _rexProject.translationJobs;
+			for(var i = 0; i < jobs.length; i++) {
+				var job = jobs[i];				
+				if(job.jobStatus != "Ready") {
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		function setChangeTranslationToReadyStatus() {
+			if(rowIsVisible()) {
+				getRow().show();
+				
+				if(allAreReady())
+				{
+					getRow().addClass("disabled");
+					_pageHelper.setIsValid(allAreReady(), "#ChangeTranslationToReadyAction");
+					getButton().attr('disabled', 'disabled');
+				} else {
+					getRow().removeClass("disabled");
+					_pageHelper.setIsValid(isOk(), "#ChangeTranslationToReadyAction");		
+				
+					_pageHelper.setButtonEnablement(isOk(), getButton());
+				}		
+			}
+		}		
+		
+		function changeTranslationToReadyClick() {
+			AjaxGet("ProjectChangeTranslationJobsToDone?id=" + _rexProject.metaProjectInternalId,  
+			function(json) { 
+				alert("De Translation processen die op 'Accepted' en 'Started' stonden zijn op 'Ready' gezet. De pagina zal worden herladen.");
+				reloadPage();
+			}, function(json, message) {
+				getErrorField().show();
+				getErrorField().html(json.responseJSON.Message + " - contact the IT team");
+				buttonDoneClicking("#ChangeTranslationToReadyButton");
+			});
+		}
+	}
+
+	function ChangeFinalizationToReadyController() {
+	
+		this.initialize = function() {
+			setChangeFinalizationToReadyStatus();
+			checkFinalizationStatusChanged();
+			
+			getButton().click(changeFinalizationToReadyClick);
+		}
+		
+		function checkFinalizationStatusChanged() {
+			setChangeFinalizationToReadyStatus();
+			
+			setTimeout(checkFinalizationStatusChanged, 1000);
+		}
+		
+		function getButtonId()  { return "ChangeFinalizationToReadyButton"; }
+		function getButton() 	{ return $("#" + getButtonId()); }
+		function getErrorField(){ return $("#ChangeFinalizationToReadyError"); }
+		function getRow() 		{ return $("#ChangeFinalizationToReadyHolder"); }
+		function rowIsVisible() { return true; }
+		
+		function isOk() 		{ return finalizationStatusIsOk() && translationStatusIsOk(); } 
+		
+		function finalizationStatusIsOk() {			
+			var jobs = _rexProject.finalizationJobs;
+			for(var i = 0; i < jobs.length; i++) {
+				var job = jobs[i];
+				if(job.jobStatus != "Accepted" && job.jobStatus != "Started") {
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		function translationStatusIsOk() {	
+			var jobs = _rexProject.translationJobs;
+			for(var i = 0; i < jobs.length; i++) {
+				var job = jobs[i];				
+				if(job.jobStatus != "Ready") {
+					return false;
+				}
+			}
+			return true;	
+		}
+		
+		function allAreReady() {
+			var jobs = _rexProject.finalizationJobs;
+			for(var i = 0; i < jobs.length; i++) {
+				var job = jobs[i];				
+				if(job.jobStatus != "Ready") {
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		function setChangeFinalizationToReadyStatus() {
+			if(rowIsVisible()) {
+				getRow().show();
+				
+				if(allAreReady())
+				{
+					getRow().addClass("disabled");
+					_pageHelper.setIsValid(true, "#ChangeFinalizationActionTranslationStatus");
+					_pageHelper.setIsValid(true, "#ChangeFinalizationActionFinalizationStatus");
+					
+					getButton().attr('disabled', 'disabled');
+				} else {
+					getRow().removeClass("disabled");
+					_pageHelper.setIsValid(translationStatusIsOk(), "#ChangeFinalizationActionTranslationStatus");
+					_pageHelper.setIsValid(finalizationStatusIsOk(), "#ChangeFinalizationActionFinalizationStatus");		
+				
+					_pageHelper.setButtonEnablement(isOk(), getButton());
+				}		
+			}
+		}		
+		
+		function changeFinalizationToReadyClick() {
+			AjaxGet("Project/ChangeFinalizationJobsToReady?internalProjectId=" + _rexProject.metaProjectInternalId,  
+			function(json) { 
+				alert("De Finalization processen die op 'Accepted' en 'Started' stonden zijn op 'Ready' gezet. De pagina zal worden herladen.");
+				reloadPage();
+			}, function(json, message) {
+				getErrorField().show();
+				getErrorField().html(json.responseJSON.Message + " - contact the IT team");
+				buttonDoneClicking("#" + getButtonId());
+			});
+		}
+	}	
+</script>
