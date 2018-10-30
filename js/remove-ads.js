@@ -1,6 +1,8 @@
 class RemoveMarktplaatsAds {
 	
 	constructor() {
+		this.amountTries = 10;
+		this.timeout = 500;
 	}
 	
 	tryRemoveSearch() {
@@ -32,6 +34,10 @@ class RemoveMarktplaatsAds {
 		this.tryRemove("div > span:contains('Advertenties door Admarkt')");
 		
 		//this.tryRemove("#adsense-bottom");
+		
+		this.tryRemove("div.location-name:contains('Bezorgt in')");
+		
+		this.tryRemoveParent("a[href$='.html?lr_snippet=horizontalRichSnippet']", "ARTICLE");
 		
 		this.tryRemoveCompaniesByUrl();
 	}
@@ -68,26 +74,34 @@ class RemoveMarktplaatsAds {
 		//todo: send those companies once every .... to some api of ourselves, so that we can distrubute those
 	}
 	
-	tryRemove(selector)
+	tryRemove(selector, count)
 	{
+		if(count === undefined) { count = _removeMarktplaatsAds.amountTries; }
+		else if(count <= 0) { return; }
+		
 		var elem = $(selector);
 		if(elem.length == 0)
 		{
 			console.log("Try remove.... " + selector);
-			setTimeout(function() { _removeMarktplaatsAds.tryRemove(selector); }, 100);
+			count--;
+			setTimeout(function(s,c) {_removeMarktplaatsAds.tryRemove(s, c);}, _removeMarktplaatsAds.timeout, selector, count);
 		} else {
 			console.log("Removed ad: " + selector);
 			elem.each(function(i, o) { $(o).remove(); });
 		}
 	}
 	
-	tryRemoveParent(selector, parentSelector)
+	tryRemoveParent(selector, parentSelector, count)
 	{
+		if(count === undefined) { count = _removeMarktplaatsAds.amountTries; }
+		else if(count <= 0) { return; }
+		
 		var col = $(selector);
 		if(col.length == 0)
 		{
 			console.log("Try remove.... " + selector);
-			setTimeout(function() { _removeMarktplaatsAds.tryRemoveParent(selector, parentSelector); }, 100);
+			count--;
+			setTimeout(function(s,p,c) { tryRemoveParent(s, p, c); },_removeMarktplaatsAds.timeout, selector, parentSelector, count);
 		} else {
 			console.log("Try removing ad by tagname: " + selector);
 			col.each(function(i, o) { 
@@ -105,13 +119,17 @@ class RemoveMarktplaatsAds {
 		}
 	}
 	
-	tryRemoveParentByClass(selector, parentClass)
-	{
+	tryRemoveParentByClass(selector, parentClass, count)
+	{		
+		if(count === undefined) { count = _removeMarktplaatsAds.amountTries; }
+		else if(count <= 0) { return; }
+		
 		var col = $(selector);
 		if(col.length == 0)
 		{
 			console.log("Try remove.... " + selector);
-			setTimeout(function() { _removeMarktplaatsAds.tryRemoveParentByClass(selector, parentClass); }, 100);
+			count--;
+			setTimeout(function(s,p,c) { _removeMarktplaatsAds.tryRemoveParentByClass(s, p, c); }, _removeMarktplaatsAds.timeout, selector, parentClass, count);
 		} else {
 			console.log("Try removing ad by class: " + selector);
 			col.each(function(i, o) { 

@@ -1,6 +1,7 @@
 $(function(){
 	
-	if(window.location.href.includes("/z/")) { 
+	if(window.location.href.includes("/z/") ||
+		window.location.href.includes("z.htm")) { 
 		_removeMarktplaatsAds.tryRemoveSearch();
 	}
 });
